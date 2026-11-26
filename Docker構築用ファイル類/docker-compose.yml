@@ -1,0 +1,45 @@
+services:
+  # PHP-FPM / Webサーバ (PHP 8.5.12 + Apache + SSL)
+  web:
+    build: .
+    container_name: php-apache-app
+    ports:
+      - "8080:80"    # HTTP用(http://localhost:8080)
+      - "4433:443"   # HTTPS用(https://localhost:4433)
+    volumes:
+      - ./src:/var/www/html
+    depends_on:
+      - mysql
+
+  # データベース (mysql / mariadb )
+  mysql:
+    image: mysql:8.0     # mariadb:10.11 または mysql:8.0を指定、、最新版はxxxx:latest  
+    container_name: mysql-db
+    restart: always
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: "rootpass"
+      # MYSQL_DATABASE: "mysql"
+      # MYSQL_USER: "root"
+      # MYSQL_PASSWORD: "rootpass"
+      TZ: Asia/Tokyo
+    volumes:
+      - mysql_db:/var/lib/mysql
+
+  # phpMyAdmin(データベース管理ツール)
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    container_name: phpmyadmin-tool
+    restart: always
+    ports:
+      - "8081:80"    # phpMyAdmin用(http://localhost:8081)
+    environment:
+      PMA_HOST: mysql
+      PMA_USER: "root"
+      PMA_PASSWORD: "rootpass"
+    depends_on:
+      - mysql
+
+volumes:
+  mysql_db:
